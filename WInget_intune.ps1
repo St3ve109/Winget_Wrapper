@@ -6,6 +6,8 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
   Exit
  }
 }
+$downloadsPath = (New-Object -ComObject Shell.Application).Namespace('shell:Downloads').Self.Path
+set-location $downloadsPath
 $Host.ui.rawui.backgroundcolor = "Black"
 $loc = Get-Location
 write-host "Current location: $loc"
