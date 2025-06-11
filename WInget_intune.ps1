@@ -7,9 +7,11 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
  }
 }
 $Host.ui.rawui.backgroundcolor = "Black"
-make-directory -ErrorAction SilentlyContinue -Path ".\Winget_Update"
-change-directory -Path ".\Winget_Update"
-write-host Get-Location
+$loc = Get-Location
+write-host "Current location: $loc"
+New-Item -Path $loc  -Name "Winget_Update" -ItemType "Directory"
+Set-Location -Path ".\Winget_Update"
+Read-Host "Press Enter to continue..."
 clear-host
 write-host " __          ___                  _     _    _           _       _            "
 write-host " \ \        / (_)                | |   | |  | |         | |     | |           "
