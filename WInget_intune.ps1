@@ -6,27 +6,50 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
   Exit
  }
 }
+$startPath = (Get-Location).Path
 $downloadsPath = (New-Object -ComObject Shell.Application).Namespace('shell:Downloads').Self.Path
 set-location $downloadsPath
 $Host.ui.rawui.backgroundcolor = "Black"
 $loc = Get-Location
-write-host "Current location: $loc"
-New-Item -Path $loc  -Name "Winget_Update" -ItemType "Directory"
+if (-not (Test-Path -Path $loc\Winget_Update)) {
+    Write-Host "Creating Winget_Update directory in the current location..."
+    New-Item -Path $loc  -Name "Winget_Update" -ItemType "Directory"
+} else {
+    Write-Host "Winget_Update directory already exists in the current location."
+}
 Set-Location -Path ".\Winget_Update"
-Read-Host "Press Enter to continue..."
 clear-host
-write-host " __          ___                  _     _    _           _       _            "
-write-host " \ \        / (_)                | |   | |  | |         | |     | |           "
-write-host "  \ \  /\  / / _ _ __   __ _  ___| |_  | |  | |_ __   __| | __ _| |_ ___ _ __ "
-write-host "   \ \/  \/ / | | '_ \ / _` |/ _ \ __| | |  | | '_ \ / _` |/ _` | __/ _ \ '__|"
-write-host "    \  /\  /  | | | | | (_| |  __/ |_  | |__| | |_) | (_| | (_| | ||  __/ |   "
-write-host "     \/  \/   |_|_| |_|\__, |\___|\__|  \____/| .__/ \__,_|\__,_|\__\___|_|   "
-write-host "                        __/ |                 | |                             "
-write-host "                       |___/                  |_|                             "
+write-host "
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  █████   ███   █████  ███                                █████                  │
+│ ░░███   ░███  ░░███  ░░░                                ░░███                   │
+│  ░███   ░███   ░███  ████  ████████    ███████  ██████  ███████                 │
+│  ░███   ░███   ░███ ░░███ ░░███░░███  ███░░███ ███░░███░░░███░                  │
+│  ░░███  █████  ███   ░███  ░███ ░███ ░███ ░███░███████   ░███                   │
+│   ░░░█████░█████░    ░███  ░███ ░███ ░███ ░███░███░░░    ░███ ███               │
+│     ░░███ ░░███      █████ ████ █████░░███████░░██████   ░░█████                │
+│      ░░░   ░░░      ░░░░░ ░░░░ ░░░░░  ░░░░░███ ░░░░░░     ░░░░░                 │
+│                                       ███ ░███                                  │
+│                                      ░░██████                                   │
+│                                       ░░░░░░                                    │
+│  █████   ███   █████                                                            │
+│ ░░███   ░███  ░░███                                                             │
+│  ░███   ░███   ░███  ████████   ██████   ████████  ████████   ██████  ████████  │
+│  ░███   ░███   ░███ ░░███░░███ ░░░░░███ ░░███░░███░░███░░███ ███░░███░░███░░███ │
+│  ░░███  █████  ███   ░███ ░░░   ███████  ░███ ░███ ░███ ░███░███████  ░███ ░░░  │
+│   ░░░█████░█████░    ░███      ███░░███  ░███ ░███ ░███ ░███░███░░░   ░███      │
+│     ░░███ ░░███      █████    ░░████████ ░███████  ░███████ ░░██████  █████     │
+│      ░░░   ░░░      ░░░░░      ░░░░░░░░  ░███░░░   ░███░░░   ░░░░░░  ░░░░░      │
+│                                          ░███      ░███                         │
+│                                          █████     █████                        │
+│                                         ░░░░░     ░░░░░                         │
+└─────────────────────────────────────────────────────────────────────────────────┘
+"
 write-host ""
-write-host "----------------------------------------"
 Install-Module ps2exe
-write-host "Welcome to the App Maker Script!"
+write-host "Welcome to Winget Wrapper"
+$certLocation = Get-Location
+write-host "Before continuing, please make sure that you your certificate (pfx file) in the" $certLocation "directory."
 $fileName = Get-ChildItem -Path . -Filter "IntuneWinAppUtil.exe"
 if ($fileName -match "IntuneWinAppUtil.exe") {
     write-host "IntuneWinAppUtil is already installed."
@@ -36,7 +59,7 @@ if ($fileName -match "IntuneWinAppUtil.exe") {
     write-host "IntuneWinAppUtil.exe has been downloaded successfully."
 }
 
-$AppName = Read-Host "Enter the name of the app you want to create: "
+$AppName = Read-Host "Enter the name of the app you want to create"
 winget search $AppName | Select-Object -First 10 | Format-Table -AutoSize
 write-host ""
 if ($LASTEXITCODE -ne 0) {
@@ -44,14 +67,14 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Make sure the app you have chosen is shown and the id is correct, if so press enter to continue otherwise type the correct id of the app"
-$AppId = Read-Host "Enter the correct id of the app (or press Enter to use the name): "
+$AppId = Read-Host "Enter the correct id of the app (or press Enter to use the name)"
 if ($AppId -eq "") {
 }else {
     $AppName = $AppId
 }
 
 write-host "Creating app '$AppName' with id '$AppId'..."
-$AppPath = Read-Host "Enter the path where you want to create the app (default is current directory): "
+$AppPath = Read-Host "Enter the path where you want to create the app (default is current directory)"
 if (-not $AppPath) {
     $AppPath = Get-Location
 }
@@ -60,18 +83,19 @@ New-Item -Path $AppPath -Name "$AppName.ps1" -ItemType File -Force | Out-Null
 set-Content -Path "$AppPath\$AppName.ps1" -Value "winget install $AppName --silent --disable-interactivity --accept-package-agreements" 
 write-host "App '$AppName' created at path: $AppPath\$AppName.ps1"
 
-write-host "----------------------------------------"
+write-host "----------------------------------------------------------------------------"
 
 ps2exe -inputFile "$AppPath\$AppName.ps1" -outputFile "$AppPath\$AppName.exe" -noConsole -requireAdmin -noOutput
 remove-item "$AppPath\$AppName.ps1" -Force
 write-host "Executable '$AppName.exe' created at path: $AppPath\$AppName.exe"
+write-host "----------------------------------------------------------------------------"
 Write-Host "Signing the executable with a self-signed certificate"
 
-$certificatePath = Read-Host "Enter the path to your self-signed certificate (PFX file): "
-$certificatePassword = Read-Host "Enter the password for the certificate: " -AsSecureString
+$certificatePath = "$AppPath\CodeSigningCert.pfx"
+$certificatePassword = Read-Host "Enter the password for the certificate" -AsSecureString
 $fileToSign = "$AppPath\$AppName.exe"
 
-$securePassword = ConvertTo-SecureString -String $certificatePassword -Force -AsPlainText
+$securePassword = $certificatePassword
 $certificate = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certificatePath, $securePassword)
 
 Set-AuthenticodeSignature -FilePath $fileToSign -Certificate $certificate
@@ -88,10 +112,11 @@ else
     Write-Host "Signature is not valid."
     break
 }
-write-host "----------------------------------------"
+write-host "----------------------------------------------------------------------------"
 write-host "Now wrap the executable in a .intunewin file using IntuneWinAppUtil.exe"
 .\IntuneWinAppUtil.exe -c $AppPath -s "$AppName.exe" -o $AppPath -q
 write-host "The .intunewin file has been created successfully."
-write-host "----------------------------------------"
+write-host "----------------------------------------------------------------------------"
 Read-Host "Press Enter to exit the script."
+set-location $startPath
 break
