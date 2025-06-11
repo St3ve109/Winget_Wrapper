@@ -7,8 +7,8 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
  }
 }
 $Host.ui.rawui.backgroundcolor = "Black"
-make-directory -ErrorAction SilentlyContinue -Path "$env:temp\Winget_Update"
-$env:PSModulePath += ";$env:temp\Winget_Update"
+make-directory -ErrorAction SilentlyContinue -Path ".\Winget_Update"
+change-directory -Path ".\Winget_Update"
 write-host Get-Location
 clear-host
 write-host " __          ___                  _     _    _           _       _            "
